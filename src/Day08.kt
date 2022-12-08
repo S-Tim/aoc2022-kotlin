@@ -5,7 +5,23 @@ fun main() {
         return input.map { line -> line.toList().map { it.digitToInt() } }
     }
 
-    fun seenTrees(forest: List<List<Int>>): Set<Pair<Int, Int>> {
+    fun addTreeIfVisible(
+        seenTrees: MutableSet<Pair<Int, Int>>,
+        forest: List<List<Int>>,
+        row: Int,
+        column: Int,
+        minHeight: Int
+    ): Int {
+        if (forest[row][column] > minHeight) {
+            seenTrees.add(Pair(row, column))
+            // return new minHeight because tree was added
+            return forest[row][column]
+        }
+        return minHeight
+    }
+
+    fun part1(input: List<String>): Int {
+        val forest = parseInput(input)
         val seenTrees = mutableSetOf<Pair<Int, Int>>()
 
         for (i in forest.indices) {
@@ -15,86 +31,33 @@ fun main() {
             var minHeightFromBottom = -1
 
             for (j in forest.indices) {
-                // from left
-                if (forest[i][j] > minHeightFromLeft) {
-                    seenTrees.add(Pair(i, j))
-                    minHeightFromLeft = forest[i][j]
-                }
-                // from top
-                if (forest[j][i] > minHeightFromTop) {
-                    seenTrees.add(Pair(j, i))
-                    minHeightFromTop = forest[j][i]
-                }
-
                 val reversedJ = forest.size - j - 1
-                // from right
-                if (forest[i][reversedJ] > minHeightFromRight) {
-                    seenTrees.add(Pair(i, reversedJ))
-                    minHeightFromRight = forest[i][reversedJ]
-                }
-                // from bottom
-                if (forest[reversedJ][i] > minHeightFromBottom) {
-                    seenTrees.add(Pair(reversedJ, i))
-                    minHeightFromBottom = forest[reversedJ][i]
-                }
+
+                minHeightFromLeft = addTreeIfVisible(seenTrees, forest, i, j, minHeightFromLeft)
+                minHeightFromTop = addTreeIfVisible(seenTrees, forest, j, i, minHeightFromTop)
+                minHeightFromRight = addTreeIfVisible(seenTrees, forest, i, reversedJ, minHeightFromRight)
+                minHeightFromBottom = addTreeIfVisible(seenTrees, forest, reversedJ, i, minHeightFromBottom)
             }
         }
-        return seenTrees
+        return seenTrees.size
     }
 
-    fun part1(input: List<String>): Int {
-        val forest = parseInput(input)
-        return seenTrees(forest).size
+    fun calcScoreForDirection(trees: List<Int>, treeHouseHeight: Int): Int {
+        return when {
+            trees.all { it < treeHouseHeight } -> trees.size
+            else -> trees.takeWhile { it < treeHouseHeight }.count() + 1
+        }
     }
 
     fun calculateScenicScore(forest: List<List<Int>>, row: Int, column: Int): Int {
-        val requiredHeight = forest[row][column]
-
-        // right
-        var tempColumn = column + 1
-        var rightScore = 0
-        while (tempColumn < forest.size && forest[row][tempColumn] < requiredHeight) {
-            tempColumn++
-            rightScore++
-        }
-        if (tempColumn < forest.size) {
-            rightScore++
-        }
-
-        // left
-        tempColumn = column - 1
-        var leftScore = 0
-        while (tempColumn >= 0 && forest[row][tempColumn] < requiredHeight) {
-            tempColumn--
-            leftScore++
-        }
-        if (tempColumn >= 0) {
-            leftScore++
-        }
-
-        // bottom
-        var tempRow = row + 1
-        var bottomScore = 0
-        while (tempRow < forest.size && forest[tempRow][column] < requiredHeight) {
-            tempRow++
-            bottomScore++
-        }
-        if (tempRow < forest.size) {
-            bottomScore++
-        }
-
-        // top
-        tempRow = row - 1
-        var topScore = 0
-        while (tempRow >= 0 && forest[tempRow][column] < requiredHeight) {
-            tempRow--
-            topScore++
-        }
-        if (tempRow >= 0) {
-            topScore++
-        }
-
-        return leftScore * rightScore * topScore * bottomScore
+        val treeHouseHeight = forest[row][column]
+        val neighboringTrees = listOf(
+            ((column + 1) until forest.size).map { forest[row][it] }, // right
+            ((column - 1) downTo 0).map { forest[row][it] }, // left
+            ((row + 1) until forest.size).map { forest[it][column] }, // down
+            ((row - 1) downTo 0).map { forest[it][column] } // up
+        )
+        return neighboringTrees.map { calcScoreForDirection(it, treeHouseHeight) }.reduce { acc, i -> acc * i }
     }
 
     fun part2(input: List<String>): Int {
