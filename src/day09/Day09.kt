@@ -1,3 +1,7 @@
+package day09
+
+import readInput
+
 fun main() {
     data class Rope(
         val head: Pair<Int, Int> = Pair(0, 0),
@@ -74,11 +78,11 @@ fun main() {
     }
 
     // test if implementation meets criteria from the description, like:
-    val testInput = readInput("Day09_test")
+    val testInput = readInput("day9/Day09_test")
     check(part1(testInput) == 13)
 //    check(part2(testInput) == 8)
 
-    val input = readInput("Day09")
-    println("Part 1: " + part1(input))
-//    println("Part 2: " + part2(input))
+    val input = readInput("day9/Day09")
+    println("Part 1: ${part1(input)}")
+//    println("Part 2: ${part2(input)}")
 }

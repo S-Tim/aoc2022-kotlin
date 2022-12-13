@@ -1,3 +1,7 @@
+package day04
+
+import readInput
+
 fun main() {
     fun parseAssignmentPair(assignment: String): Pair<Set<Int>, Set<Int>> {
         val sectionAssignmentFormat = """(\d+)-(\d+),(\d+)-(\d+)""".toRegex()
@@ -25,11 +29,11 @@ fun main() {
     }
 
     // test if implementation meets criteria from the description, like:
-    val testInput = readInput("Day04_test")
+    val testInput = readInput("day04/Day04_test")
     check(part1(testInput) == 2)
     check(part2(testInput) == 4)
 
-    val input = readInput("Day04")
-    println(part1(input))
-    println(part2(input))
+    val input = readInput("day04/Day04")
+    println("Part 1: ${part1(input)}")
+    println("Part 2: ${part2(input)}")
 }

@@ -1,3 +1,6 @@
+package day09
+
+import readInput
 import java.lang.Math.abs
 
 fun main() {

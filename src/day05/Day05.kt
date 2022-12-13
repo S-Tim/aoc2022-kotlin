@@ -1,3 +1,6 @@
+package day05
+
+import readInput
 import java.lang.IllegalArgumentException
 
 fun main() {
@@ -36,20 +39,24 @@ fun main() {
             val item = stacks[from]?.removeFirst() ?: throw IllegalArgumentException("Stack is empty")
             stacks[to]?.addFirst(item)
         }
+
         return stacks;
     }
 
     fun move2(instruction: String, stacks: MutableMap<Int, ArrayDeque<Char>>): MutableMap<Int, ArrayDeque<Char>> {
         val (count, from, to) = parseMove(instruction)
-        val tempStack = ArrayDeque<Char>()
 
+        // Move items to temp stack first so that the order is correct
+        val tempStack = ArrayDeque<Char>()
         for (i in 0 until count){
             val item = stacks[from]?.removeFirst() ?: throw IllegalArgumentException("Stack is empty")
             tempStack.addFirst(item)
         }
+
         while(tempStack.isNotEmpty()){
             stacks[to]?.addFirst(tempStack.removeFirst())
         }
+
         return stacks;
     }
 
@@ -58,8 +65,6 @@ fun main() {
         for (move in moves){
             stacks = move(move, stacks)
         }
-        println(stacks)
-
 
         return stacks.toSortedMap().values.mapNotNull { it.firstOrNull() }.joinToString(separator = "") { it.toString() }
     }
@@ -69,18 +74,16 @@ fun main() {
         for (move in moves){
             stacks = move2(move, stacks)
         }
-        println(stacks)
-
 
         return stacks.toSortedMap().values.mapNotNull { it.firstOrNull() }.joinToString(separator = "") { it.toString() }
     }
 
     // test if implementation meets criteria from the description, like:
-    val testInput = readInput("Day05_test")
+    val testInput = readInput("day05/Day05_test")
     check(part1(testInput) == "CMZ")
     check(part2(testInput) == "MCD")
 
-    val input = readInput("Day05")
-    println(part1(input))
-    println(part2(input))
+    val input = readInput("day05/Day05")
+    println("Part 1: ${part1(input)}")
+    println("Part 2: ${part2(input)}")
 }

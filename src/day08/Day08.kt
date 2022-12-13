@@ -1,3 +1,6 @@
+package day08
+
+import readInput
 import java.lang.Integer.max
 
 fun main() {
@@ -73,11 +76,11 @@ fun main() {
     }
 
     // test if implementation meets criteria from the description, like:
-    val testInput = readInput("Day08_test")
+    val testInput = readInput("day08/Day08_test")
     check(part1(testInput) == 21)
     check(part2(testInput) == 8)
 
-    val input = readInput("Day08")
-    println("Part 1: " + part1(input))
-    println("Part 2: " + part2(input))
+    val input = readInput("day08/Day08")
+    println("Part 1: ${part1(input)}")
+    println("Part 2: ${part2(input)}")
 }

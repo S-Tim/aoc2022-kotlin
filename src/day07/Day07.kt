@@ -1,3 +1,7 @@
+package day07
+
+import readInput
+
 abstract class Node(val name: String) {
     abstract fun getSize(): Int
 }
@@ -93,10 +97,8 @@ fun main() {
 
     fun part1(input: List<String>): Int {
         val root = pareInput(input)
-        // println(root)
 
         val directorySizes = getSizes(root, mutableMapOf())
-        // println(directorySizes)
         return directorySizes.filter { it.value <= 100000 }.values.sum()
     }
 
@@ -112,16 +114,15 @@ fun main() {
         val neededSpace = updateSize - freeSpace
 
         val directoryToDelete = directorySizes.filter { it.value >= neededSpace }.minBy { it.value }
-        // println(directoryToDelete)
         return directoryToDelete.value
     }
 
     // test if implementation meets criteria from the description, like:
-    val testInput = readInput("Day07_test")
+    val testInput = readInput("day07/Day07_test")
     check(part1(testInput) == 95437)
     check(part2(testInput) == 24933642)
 
-    val input = readInput("Day07")
-    println("Part 1: " + part1(input))
-    println("Part 2: " + part2(input))
+    val input = readInput("day07/Day07")
+    println("Part 1: ${part1(input)}")
+    println("Part 2: ${part2(input)}")
 }

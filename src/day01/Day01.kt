@@ -1,6 +1,11 @@
+package day01
+
+import readInput
+
 fun main() {
     fun countCalories(input: List<String>): List<Int> {
         val calories = mutableListOf<Int>()
+
         var currentCalories = 0
         for (line: String in input) {
             if (line.isEmpty()) {
@@ -10,6 +15,9 @@ fun main() {
                 currentCalories += line.toInt()
             }
         }
+
+        // Add the last elf
+        calories.add(currentCalories)
         return calories
     }
 
@@ -25,10 +33,11 @@ fun main() {
     }
 
     // test if implementation meets criteria from the description, like:
-    val testInput = readInput("Day01_test")
+    val testInput = readInput("day01/Day01_test")
     check(part1(testInput) == 24000)
+    check(part2(testInput) == 45000)
 
-    val input = readInput("Day01")
-    println(part1(input))
-    println(part2(input))
+    val input = readInput("day01/day01")
+    println("Part 1: ${part1(input)}")
+    println("Part 1: ${part2(input)}")
 }
