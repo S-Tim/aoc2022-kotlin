@@ -46,26 +46,27 @@ fun main() {
 
         var offset = 1
         while (start + offset < packet.length) {
-            if (packet[start + offset].isDigit()) {
+            val currentSymbol = packet[start + offset]
+            if (currentSymbol.isDigit()) {
                 var number = ""
                 while (packet[start + offset].isDigit()) {
                     number += packet[start + offset]
                     offset += 1
                 }
                 children.add(Value(number.toInt()))
-            } else if (packet[start + offset] == '[') {
+            } else if (currentSymbol == '[') {
                 val (container, newOffset) = parsePacket(packet, start + offset)
                 children.add(container)
                 offset += newOffset
                 offset += 1
-            } else if (packet[start + offset] == ']') {
-                return Pair(Container(children), offset)
-            } else if (packet[start + offset] == ',') {
+            } else if (currentSymbol == ',') {
                 offset += 1
+            } else if (currentSymbol == ']') {
+                return Pair(Container(children), offset)
             }
         }
 
-        throw IllegalArgumentException("Packet $packet is not formatted correctly")
+        throw IllegalArgumentException("Unexpected symbol ${packet[start + offset]} at position ${start + offset}")
     }
 
     fun part1(input: List<String>): Int {
