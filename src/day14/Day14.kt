@@ -1,15 +1,92 @@
+@file:JvmName("Day14Kt")
+
 package day14
 
 import readInput
 import kotlin.math.max
 import kotlin.math.min
 
-enum class CaveElementType { ROCK, SAND, SPAWN }
-data class CaveElement(val position: Pair<Int, Int>, val type: CaveElementType)
-
 fun main() {
-    fun parseInput(input: List<String>): MutableList<CaveElement> {
-        val rocks = mutableListOf<CaveElement>()
+    class Cave(
+        val spawn: Pair<Int, Int> = Pair(500, 0),
+        val rocks: Set<Pair<Int, Int>>,
+        var sand: MutableSet<Pair<Int, Int>> = mutableSetOf(),
+        val abyssLevel: Int? = null
+    ) {
+        private var sandCount = 0
+        private val abyss = if (abyssLevel != null) rocks.maxBy { it.second }.second + abyssLevel else null
+
+        fun spawnSand(): Boolean {
+            val elements = rocks.union(sand)
+            val yMax = elements.maxBy { it.second }.second
+
+            var currentPosition = spawn
+            while (currentPosition.second <= yMax || abyss != null) {
+                if (abyss != null && currentPosition.second == abyss - 1) {
+                    sand.add(currentPosition)
+                    sandCount++
+                    return true
+                }
+
+                currentPosition = when {
+                    Pair(currentPosition.first, currentPosition.second + 1) !in elements -> {
+                        Pair(currentPosition.first, currentPosition.second + 1)
+                    }
+
+                    Pair(currentPosition.first - 1, currentPosition.second + 1) !in elements -> {
+                        Pair(currentPosition.first - 1, currentPosition.second + 1)
+                    }
+
+                    Pair(currentPosition.first + 1, currentPosition.second + 1) !in elements -> {
+                        Pair(currentPosition.first + 1, currentPosition.second + 1)
+                    }
+
+                    else -> {
+                        sand.add(currentPosition)
+                        sandCount++
+                        return currentPosition != spawn
+                    }
+                }
+            }
+            return false
+        }
+
+        fun simulate(): Int {
+            var comesToRest = spawnSand()
+            while (comesToRest) {
+                comesToRest = spawnSand()
+            }
+
+            return sandCount
+        }
+
+        override fun toString(): String {
+            val padding = 2
+            val elements = rocks.union(sand)
+            val xMin = elements.minBy { it.first }.first
+            val xMax = elements.maxBy { it.first }.first
+            val yMax = elements.maxBy { it.second }.second
+
+            var result = ""
+            for (y in 0..(yMax + padding)) {
+                result += "$y\t"
+                for (x in (xMin - padding)..(xMax + padding)) {
+                    val currentPosition = Pair(x, y)
+                    result += when (currentPosition) {
+                        in rocks -> "#"
+                        in sand -> "X"
+                        spawn -> "+"
+                        else -> "."
+                    }
+                }
+                result += "\n"
+            }
+            return result
+        }
+    }
+
+    fun parseInput(input: List<String>): Set<Pair<Int, Int>> {
+        val rocks = mutableSetOf<Pair<Int, Int>>()
 
         for (line in input) {
             val pairs = line.split("->").map { it.trim() }
@@ -17,113 +94,37 @@ fun main() {
                 val (x1, y1) = pair1.split(",").map { it.toInt() }
                 val (x2, y2) = pair2.split(",").map { it.toInt() }
 
-                val shape = mutableListOf<CaveElement>()
+                val shape = mutableListOf<Pair<Int, Int>>()
 
                 for (x in min(x1, x2)..max(x1, x2)) {
                     for (y in min(y1, y2)..max(y1, y2)) {
-                        shape.add(CaveElement(Pair(x, y), CaveElementType.ROCK))
+                        shape.add(Pair(x, y))
                     }
                 }
 
                 rocks.addAll(shape)
             }
         }
-        rocks.add(CaveElement(Pair(500, 0), CaveElementType.SPAWN))
         return rocks
     }
 
-    fun printCave(elements: List<CaveElement>) {
-        val xMin = elements.minBy { it.position.first }.position.first
-
-        val xMax = elements.maxBy { it.position.first }.position.first
-        val yMax = elements.maxBy { it.position.second }.position.second
-
-        for (y in 0..(yMax + 1)) {
-            print("$y\t")
-            for (x in (xMin - 2)..(xMax + 2)) {
-                val currentTile = elements.firstOrNull { it.position == Pair(x, y) }?.type
-                print(
-                    when (currentTile) {
-                        CaveElementType.ROCK -> "#"
-                        CaveElementType.SAND -> "X"
-                        CaveElementType.SPAWN -> "+"
-                        null -> "."
-                    }
-                )
-            }
-            println()
-        }
-
-    }
-
-    fun isFree(elements: List<CaveElement>, x: Int, y: Int, floorHeight: Int): Boolean {
-        if (y >= floorHeight) {
-            return false
-        }
-
-        return elements.none { it.position.first == x && it.position.second == y }
-    }
-
     fun part1(input: List<String>): Int {
-        val elements = parseInput(input)
-        printCave(elements)
-
-        var sandCounter = 0
-        var currentPosition = Pair(500, 0)
-        val maxY = elements.maxBy { it.position.second }.position.second
-
-        while (currentPosition.second <= maxY) {
-            if (isFree(elements, currentPosition.first, currentPosition.second + 1, maxY + 10)) {
-                currentPosition = Pair(currentPosition.first, currentPosition.second + 1)
-            } else if (isFree(elements, currentPosition.first - 1, currentPosition.second + 1, maxY + 10)) {
-                currentPosition = Pair(currentPosition.first - 1, currentPosition.second + 1)
-            } else if (isFree(elements, currentPosition.first + 1, currentPosition.second + 1, maxY + 10)) {
-                currentPosition = Pair(currentPosition.first + 1, currentPosition.second + 1)
-            } else {
-                elements.add(CaveElement(currentPosition, CaveElementType.SAND))
-                currentPosition = Pair(500, 0)
-                sandCounter++
-            }
-        }
-
-        printCave(elements)
-        return sandCounter
+        val cave = Cave(Pair(500, 0), parseInput(input))
+        println(cave)
+        val sandCount = cave.simulate()
+        println(cave)
+        return sandCount
     }
 
     fun part2(input: List<String>): Int {
-        val elements = parseInput(input)
-        printCave(elements)
-
-        var sandCounter = 0
-        var currentPosition = Pair(500, 0)
-        val maxY = elements.maxBy { it.position.second }.position.second
-
-        while (true) {
-            if (isFree(elements, currentPosition.first, currentPosition.second + 1, maxY + 2)) {
-                currentPosition = Pair(currentPosition.first, currentPosition.second + 1)
-            } else if (isFree(elements, currentPosition.first - 1, currentPosition.second + 1, maxY + 2)) {
-                currentPosition = Pair(currentPosition.first - 1, currentPosition.second + 1)
-            } else if (isFree(elements, currentPosition.first + 1, currentPosition.second + 1, maxY + 2)) {
-                currentPosition = Pair(currentPosition.first + 1, currentPosition.second + 1)
-            } else {
-                elements.add(CaveElement(currentPosition, CaveElementType.SAND))
-                sandCounter++
-                if(sandCounter % 100 == 0){
-                    println("Units of Sand: $sandCounter")
-                }
-                if (currentPosition == Pair(500, 0)) {
-                    break
-                }
-                currentPosition = Pair(500, 0)
-            }
-        }
-
-        printCave(elements)
-        println(sandCounter)
-        return sandCounter
+        val cave = Cave(Pair(500, 0), parseInput(input), abyssLevel = 2)
+        println(cave)
+        val sandCount = cave.simulate()
+        println(cave)
+        return sandCount
     }
 
-// test if implementation meets criteria from the description, like:
+    // test if implementation meets criteria from the description, like:
     val testInput = readInput("day14/Day14_test")
     check(part1(testInput) == 24)
     check(part2(testInput) == 93)
