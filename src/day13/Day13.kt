@@ -47,22 +47,23 @@ fun main() {
         var offset = 1
         while (start + offset < packet.length) {
             val currentSymbol = packet[start + offset]
-            if (currentSymbol.isDigit()) {
-                var number = ""
-                while (packet[start + offset].isDigit()) {
-                    number += packet[start + offset]
+            when {
+                currentSymbol.isDigit() -> {
+                    var number = ""
+                    while (packet[start + offset].isDigit()) {
+                        number += packet[start + offset]
+                        offset += 1
+                    }
+                    children.add(Value(number.toInt()))
+                }
+                currentSymbol == '[' -> {
+                    val (container, newOffset) = parsePacket(packet, start + offset)
+                    children.add(container)
+                    offset += newOffset
                     offset += 1
                 }
-                children.add(Value(number.toInt()))
-            } else if (currentSymbol == '[') {
-                val (container, newOffset) = parsePacket(packet, start + offset)
-                children.add(container)
-                offset += newOffset
-                offset += 1
-            } else if (currentSymbol == ',') {
-                offset += 1
-            } else if (currentSymbol == ']') {
-                return Pair(Container(children), offset)
+                currentSymbol == ',' -> offset += 1
+                currentSymbol == ']' -> return Pair(Container(children), offset)
             }
         }
 
