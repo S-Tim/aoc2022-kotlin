@@ -14,3 +14,9 @@ fun readInput(name: String) = File("src", "$name.txt")
 fun String.md5() = BigInteger(1, MessageDigest.getInstance("MD5").digest(toByteArray()))
     .toString(16)
     .padStart(32, '0')
+
+operator fun Pair<Int, Int>.plus(other: Pair<Int, Int>): Pair<Int, Int> {
+    return Pair(first + other.first, second + other.second)
+}
+
+typealias Point = Pair<Int, Int>
