@@ -3,6 +3,7 @@ package day23
 import Point
 import day23.Directions.*
 import plus
+import printAsGrid
 import readInput
 
 enum class Directions { N, NE, NW, S, SE, SW, W, E }
@@ -55,21 +56,6 @@ fun main() {
         isFree(point, listOfNotNull(directions[E], directions[NE], directions[SE]), points)
     }
 
-    fun printGrid(points: Set<Point>) {
-        val minX = points.minBy { it.first }.first
-        val maxX = points.maxBy { it.first }.first
-        val minY = points.minBy { it.second }.second
-        val maxY = points.maxBy { it.second }.second
-
-        for (y in minY..maxY) {
-            for (x in minX..maxX) {
-                if (Point(x, y) in points) print("#") else print(".")
-            }
-            println()
-        }
-        println()
-    }
-
     fun calculateNextState(
         directions: List<Pair<(Point, Set<Point>) -> Boolean, Point>>,
         elves: Set<Point>
@@ -95,11 +81,11 @@ fun main() {
         )
         var elves = parseInput(input)
 
-        printGrid(elves)
+        printAsGrid(elves)
         repeat(10) {
             elves = calculateNextState(dirs, elves)
             dirs.add(dirs.removeFirst())
-            printGrid(elves)
+            printAsGrid(elves)
         }
 
         // calculate score
@@ -142,6 +128,6 @@ fun main() {
     check(part2(testInput) == 20)
 
     val input = readInput("day23/Day23")
-    println("Part 1: ${part1(input)}")
-    println("Part 2: ${part2(input)}")
+//    println("Part 1: ${part1(input)}")
+//    println("Part 2: ${part2(input)}")
 }
